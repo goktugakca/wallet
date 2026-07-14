@@ -61,4 +61,35 @@ public class AccountService {
         ledgerEntryRepository.save(systemLedgerEntry);
         ledgerEntryRepository.save(userLedgerEntry);
     }
+
+    @Transactional
+    public void transfer(UUID fromAccountId,UUID toAccountId,BigDecimal amount){
+        Account fromAcc = accountRepository.findById(fromAccountId).orElseThrow(()-> new IllegalArgumentException("From Account Not Found"));
+        Account toAcc = accountRepository.findById(toAccountId).orElseThrow(()-> new IllegalArgumentException("To Account Not Found"));
+
+        if (fromAccountId.equals(toAccountId))
+            throw new IllegalArgumentException("Cannot transfer to the same account");
+
+        BigDecimal bakiye = getBalance(fromAccountId);
+        if(bakiye.compareTo(amount)<0){
+            throw new IllegalStateException("Insufficient Balance");
+        }
+        Transaction transaction = new Transaction();
+        transaction.setDescription("Transfer");
+        transactionRepository.save(transaction);
+
+        LedgerEntry fromLedgerEntry = new LedgerEntry();
+        LedgerEntry toLedgerEntry = new LedgerEntry();
+
+        fromLedgerEntry.setAccount(fromAcc);
+        fromLedgerEntry.setTransaction(transaction);
+        fromLedgerEntry.setAmount(amount.negate());
+
+        toLedgerEntry.setAccount(toAcc);
+        toLedgerEntry.setTransaction(transaction);
+        toLedgerEntry.setAmount(amount);
+
+        ledgerEntryRepository.save(fromLedgerEntry);
+        ledgerEntryRepository.save(toLedgerEntry);
+    }
 }

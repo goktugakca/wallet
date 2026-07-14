@@ -3,6 +3,7 @@ package com.goktug.wallet.controller;
 import com.goktug.wallet.dto.AccountResponse;
 import com.goktug.wallet.dto.CreateAccountRequest;
 import com.goktug.wallet.dto.DepositRequest;
+import com.goktug.wallet.dto.TransferRequest;
 import com.goktug.wallet.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +30,9 @@ public class AccountController {
     @GetMapping("/{accountId}/balance")
     public BigDecimal getBalance(@PathVariable UUID accountId){
         return accountService.getBalance(accountId);
+    }
+    @PostMapping("/{fromAccountId}/transfer")
+    public void transfer(@PathVariable UUID fromAccountId , @Valid @RequestBody TransferRequest request){
+        accountService.transfer(fromAccountId,request.toAccountId(),request.amount());
     }
 }
