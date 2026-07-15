@@ -64,7 +64,7 @@ public class AccountService {
 
     @Transactional
     public void transfer(UUID fromAccountId,UUID toAccountId,BigDecimal amount){
-        Account fromAcc = accountRepository.findById(fromAccountId).orElseThrow(()-> new IllegalArgumentException("From Account Not Found"));
+        Account fromAcc = accountRepository.findByIdForUpdate(fromAccountId).orElseThrow(()-> new IllegalArgumentException("From Account Not Found"));
         Account toAcc = accountRepository.findById(toAccountId).orElseThrow(()-> new IllegalArgumentException("To Account Not Found"));
 
         if (fromAccountId.equals(toAccountId))
