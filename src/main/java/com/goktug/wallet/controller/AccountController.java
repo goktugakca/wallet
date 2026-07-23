@@ -15,6 +15,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/accounts")
 @RequiredArgsConstructor
+
 public class AccountController {
     private final AccountService accountService;
 
@@ -32,7 +33,8 @@ public class AccountController {
         return accountService.getBalance(accountId);
     }
     @PostMapping("/{fromAccountId}/transfer")
-    public void transfer(@PathVariable UUID fromAccountId , @Valid @RequestBody TransferRequest request){
-        accountService.transfer(fromAccountId,request.toAccountId(),request.amount());
+    public void transfer(@PathVariable UUID fromAccountId , @Valid @RequestBody TransferRequest request
+            ,@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey){
+        accountService.transfer(fromAccountId,request.toAccountId(),request.amount(),idempotencyKey);
     }
 }

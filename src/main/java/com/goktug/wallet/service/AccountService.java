@@ -63,7 +63,10 @@ public class AccountService {
     }
 
     @Transactional
-    public void transfer(UUID fromAccountId,UUID toAccountId,BigDecimal amount){
+    public void transfer(UUID fromAccountId,UUID toAccountId,BigDecimal amount,String idempotencyKey){
+        if(idempotencyKey != null && transactionRepository.existsByIdempotencyKey(idempotencyKey)){
+            return;
+        }
         Account fromAcc = accountRepository.findByIdForUpdate(fromAccountId).orElseThrow(()-> new IllegalArgumentException("From Account Not Found"));
         Account toAcc = accountRepository.findById(toAccountId).orElseThrow(()-> new IllegalArgumentException("To Account Not Found"));
 
@@ -76,6 +79,7 @@ public class AccountService {
         }
         Transaction transaction = new Transaction();
         transaction.setDescription("Transfer");
+        transaction.setIdempotencyKey(idempotencyKey);
         transactionRepository.save(transaction);
 
         LedgerEntry fromLedgerEntry = new LedgerEntry();
