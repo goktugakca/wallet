@@ -23,6 +23,7 @@ public class Transaction {
     @CreationTimestamp
     @Column(nullable = false)
     private Instant createdAt;
+
     @Column(unique = true)
     private String idempotencyKey;
 }

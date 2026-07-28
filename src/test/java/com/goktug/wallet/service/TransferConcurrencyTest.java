@@ -1,5 +1,4 @@
 package com.goktug.wallet.service;
-
 import com.goktug.wallet.domain.Account;
 import com.goktug.wallet.domain.AccountType;
 import com.goktug.wallet.repository.AccountRepository;
@@ -12,16 +11,13 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.math.BigDecimal;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @SpringBootTest
 @Testcontainers
 public class TransferConcurrencyTest {
@@ -61,7 +57,6 @@ public class TransferConcurrencyTest {
         executor.shutdown();
         executor.awaitTermination(30, TimeUnit.SECONDS);
         BigDecimal finalBalance = accountService.getBalance(fromAcc.getId());
-        System.out.println(">>> FINAL BALANCE: " + finalBalance + " | FAILED: " + failedCount.get());
         assertThat(finalBalance).isGreaterThanOrEqualTo(BigDecimal.ZERO);
     }
 }
