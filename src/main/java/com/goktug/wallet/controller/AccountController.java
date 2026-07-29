@@ -36,7 +36,7 @@ public class AccountController {
     }
     @PostMapping("/{fromAccountId}/transfer")
     public void transfer(@PathVariable UUID fromAccountId , @Valid @RequestBody TransferRequest request
-            ,@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey){
-        accountService.transfer(fromAccountId,request.toAccountId(),request.amount(),idempotencyKey);
+            ,@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey, @AuthenticationPrincipal User currentUser){
+        accountService.transfer(fromAccountId,request.toAccountId(),request.amount(),idempotencyKey,currentUser);
     }
 }

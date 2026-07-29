@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,12 +69,16 @@ public class AccountService {
     }
 
     @Transactional
-    public void transfer(UUID fromAccountId,UUID toAccountId,BigDecimal amount,String idempotencyKey){
+    public void transfer(UUID fromAccountId, UUID toAccountId, BigDecimal amount, String idempotencyKey, @AuthenticationPrincipal User currentUser){
         if(idempotencyKey != null && transactionRepository.existsByIdempotencyKey(idempotencyKey)){
             return;
         }
         Account fromAcc = accountRepository.findByIdForUpdate(fromAccountId).orElseThrow(()-> new IllegalArgumentException("From Account Not Found"));
         Account toAcc = accountRepository.findById(toAccountId).orElseThrow(()-> new IllegalArgumentException("To Account Not Found"));
+
+        if (fromAcc.getUser() == null || !fromAcc.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You do not have access to this account");
+        }
 
         if (fromAccountId.equals(toAccountId))
             throw new IllegalArgumentException("Cannot transfer to the same account");
