@@ -1,5 +1,7 @@
 package com.goktug.wallet.controller;
 
+import com.goktug.wallet.dto.AuthResponse;
+import com.goktug.wallet.dto.LoginRequest;
 import com.goktug.wallet.dto.RegisterRequest;
 import com.goktug.wallet.dto.UserResponse;
 import com.goktug.wallet.service.UserService;
@@ -20,5 +22,9 @@ public class AuthController {
     public UserResponse register(@Valid @RequestBody RegisterRequest request){
 
         return UserResponse.from(userService.register(request.username(),request.password()));
+    }
+    @PostMapping("/login")
+    public AuthResponse login(@Valid @RequestBody LoginRequest request){
+        return new AuthResponse(userService.login(request.username(),request.password()));
     }
 }
