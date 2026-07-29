@@ -10,13 +10,10 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TransferEventPublisher {
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, TransferEvent> kafkaTemplate;
 
     public void publishTransferEvent(UUID fromAccountId, UUID toAccountId, BigDecimal amount) {
-        String event = String.format(
-                "Transfer completed: from=%s, to=%s, amount=%s",
-                fromAccountId, toAccountId, amount
-        );
+        TransferEvent event = new TransferEvent(fromAccountId,toAccountId,amount);
         kafkaTemplate.send("transfers", event);
     }
 }
