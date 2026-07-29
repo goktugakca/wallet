@@ -2,6 +2,7 @@ package com.goktug.wallet.service;
 
 import com.goktug.wallet.domain.*;
 import com.goktug.wallet.dto.DepositRequest;
+import com.goktug.wallet.event.TransferEventPublisher;
 import com.goktug.wallet.repository.AccountRepository;
 import com.goktug.wallet.repository.LedgerEntryRepository;
 import com.goktug.wallet.repository.TransactionRepository;
@@ -27,7 +28,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final LedgerEntryRepository ledgerEntryRepository;
     private final TransactionRepository transactionRepository;
-
+    private final TransferEventPublisher transferEventPublisher;
     public Account createAccount(String ownerName, AccountType type, User user){
         Account acc = new Account();
         acc.setOwnerName(ownerName);
@@ -105,5 +106,7 @@ public class AccountService {
 
         ledgerEntryRepository.save(fromLedgerEntry);
         ledgerEntryRepository.save(toLedgerEntry);
+
+        transferEventPublisher.publishTransferEvent(fromAccountId, toAccountId, amount);
     }
 }
