@@ -1,9 +1,6 @@
 package com.goktug.wallet.service;
 
-import com.goktug.wallet.domain.Account;
-import com.goktug.wallet.domain.AccountType;
-import com.goktug.wallet.domain.LedgerEntry;
-import com.goktug.wallet.domain.Transaction;
+import com.goktug.wallet.domain.*;
 import com.goktug.wallet.dto.DepositRequest;
 import com.goktug.wallet.repository.AccountRepository;
 import com.goktug.wallet.repository.LedgerEntryRepository;
@@ -12,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,13 +27,20 @@ public class AccountService {
     private final LedgerEntryRepository ledgerEntryRepository;
     private final TransactionRepository transactionRepository;
 
-    public Account createAccount(String ownerName, AccountType type){
+    public Account createAccount(String ownerName, AccountType type, User user){
         Account acc = new Account();
         acc.setOwnerName(ownerName);
         acc.setType(type);
+        acc.setUser(user);
         return accountRepository.save(acc);
     }
-    public BigDecimal getBalance(UUID accountId){
+    public BigDecimal getBalance(UUID accountId,User currentUser){
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+
+        if (account.getUser() == null || !account.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You do not have access to this account");
+        }
         return ledgerEntryRepository.sumAmountByAccountId(accountId);
     }
     @Transactional
@@ -73,7 +78,7 @@ public class AccountService {
         if (fromAccountId.equals(toAccountId))
             throw new IllegalArgumentException("Cannot transfer to the same account");
 
-        BigDecimal bakiye = getBalance(fromAccountId);
+        BigDecimal bakiye = getBalance(fromAccountId,fromAcc.getUser());
         if(bakiye.compareTo(amount)<0){
             throw new IllegalStateException("Insufficient Balance");
         }
